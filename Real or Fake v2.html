@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Cyvex · Module 3 — Real or Fake?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bruno+Ace+SC&family=Michroma&family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Cyvex brand palette */
+    --cv-black:    #000000;
+    --cv-dk-grey:  #262626;
+    --cv-grey:     #D8D9D9;
+    --cv-white:    #FFFFFF;
+    --cv-purple:   #392C84;
+    --cv-neon:     #E52AF2;
+    --cv-blush:    #C2A6B3;
+
+    /* Mapped tokens */
+    --bg-deep:     #000000;
+    --bg-surface:  #0a0a10;
+    --bg-elevated: #14141c;
+    --bg-card:     #1a1a22;
+    --bg-hover:    #262626;
+    --bg-glow:     rgba(229,42,242,0.06);
+
+    --text-1:      #FFFFFF;
+    --text-2:      #D8D9D9;
+    --text-3:      #7d7d86;
+    --text-mute:   #545459;
+
+    --accent:      #E52AF2;          /* neon CTA */
+    --accent-dim:  rgba(229,42,242,0.55);
+    --accent-soft: rgba(229,42,242,0.12);
+
+    --purple:      #392C84;
+    --purple-glow: rgba(57,44,132,0.55);
+    --purple-line: #6E5BE8;          /* derived bright violet for outlines */
+
+    --blush:       #C2A6B3;
+    --neon:        #E52AF2;          /* alias used by older code */
+
+    --gold:        #F5B731;
+    --gold-dim:    rgba(245,183,49,0.12);
+
+    --border:      rgba(229,42,242,0.10);
+    --border-s:    rgba(229,42,242,0.30);
+    --border-soft: rgba(255,255,255,0.06);
+
+    --r-sm: 6px; --r-md: 12px; --r-lg: 20px; --r-xl: 28px;
+
+    --f-display: "Bruno Ace SC", "Michroma", system-ui, sans-serif;
+    --f-tech:    "Michroma", "Bruno Ace SC", monospace;
+    --f-sans:    "Poppins", system-ui, -apple-system, sans-serif;
+    --f-mono:    "Michroma", ui-monospace, monospace;
+    /* aliases for legacy refs */
+    --f-serif:   "Bruno Ace SC", system-ui, sans-serif;
+
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+    --glow-neon: 0 0 0 1px rgba(229,42,242,0.45), 0 0 24px rgba(229,42,242,0.25), 0 0 60px rgba(229,42,242,0.12);
+    --glow-purple: 0 0 0 1px rgba(110,91,232,0.45), 0 0 24px rgba(57,44,132,0.35), 0 0 60px rgba(57,44,132,0.18);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: var(--f-sans); background: var(--bg-deep); color: var(--text-1);
+    font-size: 16px; line-height: 1.65; font-weight: 300;
+    -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  ::selection { background: rgba(229,42,242,0.40); color: var(--cv-white); }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+  button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+  a { color: var(--accent); text-decoration: none; }
+  textarea { font: inherit; }
+
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border-s); border-radius: 3px; }
+
+  @keyframes fadeInUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes slideInRight { from { opacity: 0; transform: translateX(40px); } to { opacity: 1; transform: translateX(0); } }
+  @keyframes slideInUp { from { opacity: 0; transform: translateY(60px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes pulseRing { 0%, 100% { box-shadow: 0 0 0 0 rgba(229,42,242,0.45); } 50% { box-shadow: 0 0 0 10px rgba(229,42,242,0); } }
+  @keyframes glowPulse { 0%, 100% { opacity: 0.55; text-shadow: 0 0 0 transparent; } 50% { opacity: 1; text-shadow: 0 0 18px rgba(229,42,242,0.6); } }
+  @keyframes shapeDrift { 0%, 100% { transform: translateY(0) scale(1); } 50% { transform: translateY(-18px) scale(1.04); } }
+
+  .anim-in { animation: fadeInUp 0.6s var(--ease-out) both; }
+  .anim-in-1 { animation-delay: 0.08s; }
+  .anim-in-2 { animation-delay: 0.16s; }
+  .anim-in-3 { animation-delay: 0.24s; }
+  .anim-in-4 { animation-delay: 0.32s; }
+  .anim-in-5 { animation-delay: 0.40s; }
+
+  /* Network canvas */
+  #network-canvas {
+    position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    opacity: 0.85;
+  }
+
+  /* Decorative brand shapes — drifting behind content */
+  .cv-shape {
+    position: fixed; z-index: 0; pointer-events: none;
+    opacity: 0.32; filter: blur(0.5px);
+    animation: shapeDrift 16s ease-in-out infinite;
+    mix-blend-mode: screen;
+  }
+  .cv-shape.left  { left: -10vw; bottom: -8vh; width: 60vw; max-width: 820px; }
+  .cv-shape.right { right: -10vw; top: 8vh;    width: 50vw; max-width: 720px; animation-delay: -8s; }
+
+  /* Phase transition */
+  .phase-container { opacity: 1; transform: translateY(0); transition: opacity 0.35s ease, transform 0.35s ease; }
+  .phase-container.exiting { opacity: 0; transform: translateY(-16px); }
+  .phase-container.entering { opacity: 0; transform: translateY(20px); }
+
+  @media (max-width: 768px) {
+    body { font-size: 15px; }
+    .cv-shape { opacity: 0.18; }
+  }
+</style>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+</head>
+<body>
+  <canvas id="network-canvas"></canvas>
+  <img src="Shape_left.png"  alt="" class="cv-shape left"  aria-hidden="true" />
+  <img src="Shape_Right.png" alt="" class="cv-shape right" aria-hidden="true" />
+  <div id="root"></div>
+
+  <script type="text/babel" src="v2-shared.jsx"></script>
+  <script type="text/babel" src="v2-phase1.jsx"></script>
+  <script type="text/babel" src="v2-phase2.jsx"></script>
+  <script type="text/babel" src="v2-phase3.jsx"></script>
+  <script type="text/babel" src="v2-phase4.jsx"></script>
+  <script type="text/babel" src="v2-phase5.jsx"></script>
+  <script type="text/babel" src="v2-app.jsx"></script>
+</body>
+</html>
